@@ -70,9 +70,11 @@ function SidebarProvider({
 
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
+
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value
+
       if (setOpenProp) {
         setOpenProp(openState)
       } else {
@@ -85,7 +87,9 @@ function SidebarProvider({
   )
 
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
+    return isMobile
+      ? setOpenMobile((open) => !open)
+      : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
   React.useEffect(() => {
@@ -130,7 +134,7 @@ function SidebarProvider({
           } as React.CSSProperties
         }
         className={cn(
-          "group/sidebar-wrapper flex min-h-svh w-full bg-sidebar",
+          "group/sidebar-wrapper flex min-h-svh w-full bg-white",
           className
         )}
         {...props}
@@ -161,7 +165,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
+          "flex h-full w-(--sidebar-width) flex-col bg-white text-sidebar-foreground",
           className
         )}
         {...props}
@@ -179,7 +183,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="inset-x-0 bottom-0 top-auto h-[70dvh] w-full rounded-t-2xl border-t border-border/30 bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          className="inset-x-0 bottom-0 top-auto h-[70dvh] w-full rounded-t-2xl border-t border-border/30 bg-white p-0 text-sidebar-foreground [&>button]:hidden"
           showCloseButton={false}
           side="bottom"
         >
@@ -188,7 +192,9 @@ function Sidebar({
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
           <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-sidebar-foreground/20" />
-          <div className="flex h-full w-full flex-col overflow-y-auto pt-2">{children}</div>
+          <div className="flex h-full w-full flex-col overflow-y-auto pt-2">
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
@@ -229,7 +235,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className="flex size-full flex-col bg-white group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
         >
           {children}
         </div>
@@ -272,7 +278,10 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
     <div
       data-slot="sidebar-rail"
       className={cn(
-        "group/rail absolute inset-y-0 z-20 hidden w-4 overflow-visible group-data-[side=left]:-right-4 sm:block",
+        "group/rail absolute inset-y-0 z-0 hidden sm:block pointer-events-none",
+        isCollapsed
+          ? "left-0 w-(--sidebar-width-icon)"
+          : "w-16 group-data-[side=left]:-right-16",
         className
       )}
     >
@@ -281,31 +290,50 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
         aria-label="Toggle Sidebar"
         tabIndex={-1}
         onClick={toggleSidebar}
-        className="absolute inset-y-0 left-0 w-4 cursor-w-resize !border-0 [[data-side=left][data-state=collapsed]_&]:cursor-e-resize"
+        className={cn(
+          "absolute left-0 border-0 pointer-events-auto",
+          isCollapsed
+            ? "top-11 bottom-0 w-full cursor-e-resize"
+            : "inset-y-0 w-16 cursor-w-resize"
+        )}
         {...props}
       />
-      <button
-        aria-label="Toggle Sidebar"
-        tabIndex={-1}
-        onClick={toggleSidebar}
-        className={cn(
-          "absolute left-0 h-3 w-3 cursor-e-resize !border-0",
-          isCollapsed ? "top-0" : "top-[calc(3.5rem-6px)] cursor-w-resize"
-        )}
-      />
-      <button
-        aria-label="Toggle Sidebar"
-        tabIndex={-1}
-        onClick={toggleSidebar}
-        className={cn(
-          "absolute left-3 h-[6px] w-[100vw] !border-0",
-          isCollapsed ? "top-0 cursor-default" : "top-[calc(3.5rem-6px)] cursor-default"
-        )}
-      />
-      <div className={cn(
-        "pointer-events-none absolute bottom-0 left-0 w-[100vw] rounded-tl-[12px] opacity-0",
-        isCollapsed ? "top-0" : "top-14"
-      )} />
+
+      {!isCollapsed && (
+        <>
+          <button
+            aria-label="Toggle Sidebar"
+            tabIndex={-1}
+            onClick={toggleSidebar}
+            className="absolute left-0 h-3 w-3 top-[calc(3.5rem-6px)] cursor-w-resize pointer-events-auto"
+          />
+          <button
+            aria-label="Toggle Sidebar"
+            tabIndex={-1}
+            onClick={toggleSidebar}
+            className="absolute left-3 h-[6px] w-[100vw] border-0 top-[calc(3.5rem-6px)] cursor-default pointer-events-auto"
+          />
+          <div className="pointer-events-none absolute bottom-0 left-0 w-[100vw] opacity-0 top-14" />
+        </>
+      )}
+
+      {isCollapsed && (
+        <>
+          <button
+            aria-label="Toggle Sidebar"
+            tabIndex={-1}
+            onClick={toggleSidebar}
+            className="absolute left-0 h-3 w-3 top-0 cursor-e-resize pointer-events-auto"
+          />
+          <button
+            aria-label="Toggle Sidebar"
+            tabIndex={-1}
+            onClick={toggleSidebar}
+            className="absolute left-3 h-[6px] w-[100vw] border-0 top-0 cursor-default pointer-events-auto"
+          />
+          <div className="pointer-events-none absolute bottom-0 left-0 w-[100vw] opacity-0 top-0" />
+        </>
+      )}
     </div>
   )
 }
@@ -315,7 +343,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "relative flex w-full flex-1 flex-col bg-sidebar [transform:translate3d(0,0,0)]",
+        "relative flex w-full flex-1 flex-col bg-white [transform:translate3d(0,0,0)]",
         className
       )}
       {...props}
@@ -382,7 +410,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-hidden [--radius:var(--radius-xl)] group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto [--radius:var(--radius-xl)] group-data-[collapsible=icon]:overflow-y-auto",
         className
       )}
       {...props}
@@ -526,15 +554,7 @@ function SidebarMenuButton({
     />
   )
 
-  if (!tooltip) {
-    return button
-  }
-
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
+  if (!tooltip) return button
 
   return (
     <Tooltip>
@@ -543,7 +563,7 @@ function SidebarMenuButton({
         side="right"
         align="center"
         hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
+        {...(typeof tooltip === "string" ? { children: tooltip } : tooltip)}
       />
     </Tooltip>
   )
@@ -599,9 +619,7 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  const [width] = React.useState(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  })
+  const [width] = React.useState(() => `${Math.floor(Math.random() * 40) + 50}%`)
 
   return (
     <div
@@ -611,19 +629,12 @@ function SidebarMenuSkeleton({
       {...props}
     >
       {showIcon && (
-        <Skeleton
-          className="size-4 rounded-md"
-          data-sidebar="menu-skeleton-icon"
-        />
+        <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />
       )}
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          } as React.CSSProperties
-        }
+        style={{ "--skeleton-width": width } as React.CSSProperties}
       />
     </div>
   )

@@ -1,7 +1,8 @@
+// components/chat/chat-header.tsx
 "use client";
 
 import { PanelLeftIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -16,38 +17,33 @@ function PureChatHeader({
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
 }) {
-  const pathname = usePathname();
+  const { toggleSidebar, isMobile } = useSidebar();
 
-  if (!chatId || pathname === "/") {
+  if (!chatId) {
     return null;
   }
 
-  // Hook appelé seulement si on n'est pas sur la page d'accueil
-  return <ChatHeaderInner chatId={chatId} selectedVisibilityType={selectedVisibilityType} isReadonly={isReadonly} />;
-}
-
-function ChatHeaderInner({
-  chatId,
-  selectedVisibilityType,
-  isReadonly,
-}: {
-  chatId: string;
-  selectedVisibilityType: VisibilityType;
-  isReadonly: boolean;
-}) {
-  const { toggleSidebar } = useSidebar();
-
   return (
-    <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-white dark:bg-background px-3">
-      <Button
-        className="md:hidden"
-        onClick={toggleSidebar}
-        size="icon-sm"
-        variant="ghost"
-      >
-        <PanelLeftIcon className="size-4" />
-      </Button>
+    <header className="sticky top-0 flex h-14 shrink-0 items-center justify-between gap-2 bg-white dark:bg-background px-3">
+      {/* Partie gauche : Nom */}
+      <div className="flex items-center gap-2.5">
+        <Button
+          className="md:hidden"
+          onClick={toggleSidebar}
+          size="icon-sm"
+          variant="ghost"
+        >
+          <PanelLeftIcon className="size-4" />
+        </Button>
+        <Link
+          className="text-xl font-semibold text-foreground tracking-tight"
+          href="/"
+        >
+          Orion
+        </Link>
+      </div>
 
+      {/* Partie droite : VisibilitySelector */}
       {!isReadonly && (
         <VisibilitySelector
           chatId={chatId}

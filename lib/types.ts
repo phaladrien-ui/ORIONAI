@@ -1,10 +1,13 @@
+// lib/types.ts
 import type { InferUITool, UIMessage } from "ai";
 import { z } from "zod";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { createDocument } from "./ai/tools/create-document";
 import type { getWeather } from "./ai/tools/get-weather";
+import type { newsSearch } from "./ai/tools/news-search";
 import type { requestSuggestions } from "./ai/tools/request-suggestions";
 import type { updateDocument } from "./ai/tools/update-document";
+import type { webSearch } from "./ai/tools/web-search";
 import type { Suggestion } from "./db/schema";
 
 export const messageMetadataSchema = z.object({
@@ -19,12 +22,16 @@ type updateDocumentTool = InferUITool<ReturnType<typeof updateDocument>>;
 type requestSuggestionsTool = InferUITool<
   ReturnType<typeof requestSuggestions>
 >;
+type webSearchTool = InferUITool<typeof webSearch>;
+type newsSearchTool = InferUITool<typeof newsSearch>;
 
 export type ChatTools = {
   getWeather: weatherTool;
   createDocument: createDocumentTool;
   updateDocument: updateDocumentTool;
   requestSuggestions: requestSuggestionsTool;
+  webSearch: webSearchTool;
+  newsSearch: newsSearchTool;
 };
 
 export type CustomUIDataTypes = {

@@ -63,7 +63,12 @@ function PureMessages({
   const hasMessages = messages.length > 0;
 
   return (
-    <div className={cn("relative bg-white dark:bg-background", hasMessages ? "flex-1" : "")}>
+    <div
+      className={cn(
+        "relative bg-white dark:bg-background",
+        hasMessages ? "flex-1" : ""
+      )}
+    >
       {!hasMessages && !isLoading && (
         <div className="pointer-events-none flex justify-center pt-20">
           <Greeting />
@@ -72,7 +77,9 @@ function PureMessages({
       <div
         className={cn(
           "touch-pan-y overflow-y-auto no-scrollbar",
-          hasMessages ? "absolute inset-0 bg-white dark:bg-background" : "bg-transparent"
+          hasMessages
+            ? "absolute inset-0 bg-white dark:bg-background"
+            : "bg-transparent"
         )}
         ref={messagesContainerRef}
         style={isArtifactVisible ? { scrollbarWidth: "none" } : undefined}

@@ -18,6 +18,7 @@ export const user = pgTable("User", {
   name: text("name"),
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
+  bio: text("bio"),
   isAnonymous: boolean("isAnonymous").notNull().default(false),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
@@ -134,3 +135,14 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const userSettings = pgTable("UserSettings", {
+  userId: uuid("userId")
+    .primaryKey()
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  preferences: json("preferences").notNull().default({}),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type UserSettings = InferSelectModel<typeof userSettings>;

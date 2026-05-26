@@ -15,6 +15,7 @@ import {
   ChevronDownIcon,
   CircleIcon,
   ClockIcon,
+  GlobeIcon,
   WrenchIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -36,6 +37,8 @@ export type ToolPart = ToolUIPart | DynamicToolUIPart;
 export type ToolHeaderProps = {
   title?: string;
   className?: string;
+  icon?: ReactNode;
+  showBadge?: boolean;
 } & (
   | { type: ToolUIPart["type"]; state: ToolUIPart["state"]; toolName?: never }
   | {
@@ -72,12 +75,19 @@ export const getStatusBadge = (status: ToolPart["state"]) => (
   </Badge>
 );
 
+const toolIcons: Record<string, ReactNode> = {
+  "tool-webSearch": <GlobeIcon className="size-4 text-muted-foreground" />,
+  "tool-newsSearch": <GlobeIcon className="size-4 text-muted-foreground" />,
+};
+
 export const ToolHeader = ({
   className,
   title,
   type,
   state,
   toolName,
+  icon,
+  showBadge = true,
   ...props
 }: ToolHeaderProps) => {
   const derivedName =
@@ -92,11 +102,13 @@ export const ToolHeader = ({
       {...props}
     >
       <div className="flex items-center gap-2">
-        <WrenchIcon className="size-4 text-muted-foreground" />
+        {icon ?? toolIcons[type] ?? (
+          <WrenchIcon className="size-4 text-muted-foreground" />
+        )}
         <span className="font-medium text-sm">{title ?? derivedName}</span>
-        {getStatusBadge(state)}
+        {showBadge && getStatusBadge(state)}
       </div>
-      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </CollapsibleTrigger>
   );
 };
@@ -106,7 +118,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 space-y-4 p-4 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
+      "space-y-4 px-4 pb-4 text-popover-foreground outline-none overflow-hidden",
       className
     )}
     {...props}

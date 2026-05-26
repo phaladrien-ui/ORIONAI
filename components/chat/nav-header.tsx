@@ -20,17 +20,17 @@ export function NavHeader() {
       <nav className="flex items-center gap-1">
         {links.map((link) => (
           <Link
-            key={link.href}
-            href={link.href}
             className={cn(
               "px-3 py-1.5 text-[13px] text-muted-foreground/80 hover:text-foreground transition-colors rounded-lg hover:bg-muted/50",
               pathname === link.href && "text-foreground bg-muted/40"
             )}
+            href={link.href}
+            key={link.href}
           >
             {link.label}
           </Link>
         ))}
-        <Link href="/login" className="ml-2">
+        <Link className="ml-2" href="/login">
           <Button className="h-8 rounded-lg bg-foreground text-background hover:bg-foreground/90 text-[13px] px-3.5 font-medium cursor-pointer">
             Sign in
           </Button>

@@ -184,6 +184,22 @@
     line-height: 1.2;
   }
 
+  p,
+  span,
+  a,
+  li,
+  td,
+  th,
+  label,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: 15px;
+  }
+
   p {
     line-height: 1.6;
   }
@@ -214,10 +230,10 @@ textarea:focus-visible {
 }
 
 @utility no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
   &::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
 }
 
@@ -401,19 +417,15 @@ textarea:focus-visible {
   @apply overflow-auto!;
 }
 
-.ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
-.ͼo.cm-selectionBackground,
-.ͼo.cm-content::selection {
+.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.cm-selectionBackground,
+.cm-content::selection {
   background: oklch(0.55 0.12 250 / 0.15) !important;
 }
 
-.dark
-  .ͼo.cm-focused
-  > .cm-scroller
-  > .cm-selectionLayer
-  .cm-selectionBackground,
-.dark .ͼo.cm-selectionBackground,
-.dark .ͼo.cm-content::selection {
+.dark .cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.dark .cm-selectionBackground,
+.dark .cm-content::selection {
   background: oklch(0.55 0.12 250 / 0.2) !important;
 }
 
@@ -496,13 +508,55 @@ textarea:focus-visible {
   }
 }
 
+/* ============================================
+   Sidebar scrollbar : visible uniquement au survol
+   Utilise une CSS custom property pour piloter
+   la couleur depuis le parent au hover
+   ============================================ */
+
+[data-slot="sidebar-inner"] {
+  --sb-thumb: transparent;
+}
+
+[data-slot="sidebar-inner"]:hover {
+  --sb-thumb: oklch(0 0 0 / 0.2);
+}
+
+.dark [data-slot="sidebar-inner"]:hover {
+  --sb-thumb: oklch(1 0 0 / 0.15);
+}
+
+[data-slot="sidebar-content"] {
+  scrollbar-color: var(--sb-thumb) transparent !important;
+}
+
+[data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb) !important;
+}
+
+[data-slot="sidebar-inner"]:hover
+  [data-slot="sidebar-content"]::-webkit-scrollbar-thumb:hover {
+  background: oklch(0 0 0 / 0.35) !important;
+}
+
+.dark
+  [data-slot="sidebar-inner"]:hover
+  [data-slot="sidebar-content"]::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 0.28) !important;
+}
+
+/* ============================================ */
+
 [data-testid="artifact"] {
   isolation: isolate;
 }
+
 [data-slot="input-group"]:has([data-slot="input-group-control"]:focus-visible) {
-  ring: 0 !important;
+  outline: none !important;
   box-shadow: none !important;
-}[data-slot="input-group"]:has([data-slot="input-group-control"]:focus-visible) {
+}
+
+[data-slot="input-group"]:has([data-slot="input-group-control"]:focus-visible) {
   border-color: var(--border) !important;
 }
 
@@ -513,11 +567,12 @@ textarea:focus-visible {
 .dark [data-testid="multimodal-input"] {
   caret-color: white;
 }
+
 [data-slot="sidebar-inset"] {
   overflow: hidden !important;
 }
 
-nav header, .sticky {
+nav header,
+.sticky {
   position: sticky !important;
 }
-

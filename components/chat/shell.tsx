@@ -25,6 +25,7 @@ import { DataStreamHandler } from "./data-stream-handler";
 import { submitEditedMessage } from "./message-editor";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
+import { SearchArtifactPanel } from "./search-artifact-panel";
 
 export function ChatShell() {
   const {
@@ -53,7 +54,7 @@ export function ChatShell() {
   );
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-  const { setArtifact } = useArtifact();
+  const { artifact, setArtifact } = useArtifact();
 
   const stopRef = useRef(stop);
   stopRef.current = stop;
@@ -68,6 +69,8 @@ export function ChatShell() {
       setAttachments([]);
     }
   }, [chatId, setArtifact]);
+
+  const isNewEmptyChat = !chatId || (chatId && messages.length === 0 && !isLoading);
 
   return (
     <>
@@ -102,7 +105,7 @@ export function ChatShell() {
               votes={votes}
             />
 
-            <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-3xl gap-2 border-t-0 bg-white dark:bg-background px-2 pb-3 md:px-4 md:pb-4">
+            <div className={`sticky bottom-0 z-1 mx-auto flex w-full max-w-3xl gap-2 border-t-0 bg-white dark:bg-background px-2 pb-3 md:px-4 md:pb-4 ${isNewEmptyChat ? "" : "mt-auto"}`}>
               {!isReadonly && (
                 <MultimodalInput
                   attachments={attachments}
@@ -144,24 +147,28 @@ export function ChatShell() {
           </div>
         </div>
 
-        <Artifact
-          addToolApprovalResponse={addToolApprovalResponse}
-          attachments={attachments}
-          chatId={chatId}
-          input={input}
-          isReadonly={isReadonly}
-          messages={messages}
-          regenerate={regenerate}
-          selectedModelId={currentModelId}
-          selectedVisibilityType={visibilityType}
-          sendMessage={sendMessage}
-          setAttachments={setAttachments}
-          setInput={setInput}
-          setMessages={setMessages}
-          status={status}
-          stop={stop}
-          votes={votes}
-        />
+        {artifact.kind === "search" ? (
+          <SearchArtifactPanel />
+        ) : (
+          <Artifact
+            addToolApprovalResponse={addToolApprovalResponse}
+            attachments={attachments}
+            chatId={chatId}
+            input={input}
+            isReadonly={isReadonly}
+            messages={messages}
+            regenerate={regenerate}
+            selectedModelId={currentModelId}
+            selectedVisibilityType={visibilityType}
+            sendMessage={sendMessage}
+            setAttachments={setAttachments}
+            setInput={setInput}
+            setMessages={setMessages}
+            status={status}
+            stop={stop}
+            votes={votes}
+          />
+        )}
       </div>
 
       <DataStreamHandler />

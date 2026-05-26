@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  PanelLeftIcon,
-  PenSquareIcon,
-  TrashIcon,
-} from "lucide-react";
+import { PanelLeftIcon, PenSquareIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
@@ -66,7 +62,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar collapsible="icon">
+      <Sidebar collapsible="icon" className="bg-white">
         <SidebarHeader className="pb-0 pt-3">
           <SidebarMenu>
             <SidebarMenuItem className="flex flex-row items-center justify-between">
@@ -77,7 +73,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   tooltip="Orion"
                 >
                   <Link href="/" onClick={() => setOpenMobile(false)}>
-                    <OrionLogo className="text-sidebar-foreground/50" size={36} />
+                    <OrionLogo
+                      className="text-sidebar-foreground/50"
+                      size={36}
+                    />
                   </Link>
                 </SidebarMenuButton>
                 <Tooltip>
@@ -101,7 +100,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="pt-1">
+          <SidebarGroup className="pt-1 relative z-10">
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -134,7 +133,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </SidebarGroup>
           <SidebarHistory user={user} />
         </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
+        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3 relative z-10">
           {user && <SidebarUserNav user={user} />}
         </SidebarFooter>
         <SidebarRail />

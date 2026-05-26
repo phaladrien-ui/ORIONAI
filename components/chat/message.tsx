@@ -1,25 +1,22 @@
 "use client";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useArtifact } from "@/hooks/use-artifact";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
 import { MessageContent, MessageResponse } from "../ai-elements/message";
 import { Shimmer } from "../ai-elements/shimmer";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput,
-} from "../ai-elements/tool";
+import { Tool, ToolContent, ToolHeader, ToolOutput } from "../ai-elements/tool";
 import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
 import { DocumentPreview } from "./document-preview";
-import { SparklesIcon } from "./icons";
 import { MessageActions } from "./message-actions";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
-import { Weather } from "./weather";
+import { NewsSearchTool, WeatherTool, WebSearchTool } from "./tools";
 
 const PurePreviewMessage = ({
   addToolApprovalResponse,
@@ -49,6 +46,14 @@ const PurePreviewMessage = ({
   );
 
   useDataStream();
+
+  const artifactContext = useArtifact();
+  const setArtifact = artifactContext ? artifactContext.setArtifact : null;
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
@@ -119,6 +124,8 @@ const PurePreviewMessage = ({
           className={cn("text-[13px] leading-[1.65]", {
             "w-fit max-w-[min(80%,56ch)] overflow-hidden break-words rounded-2xl rounded-br-lg border border-border/30 bg-gradient-to-br from-secondary to-muted px-3.5 py-2 shadow-[var(--shadow-card)]":
               message.role === "user",
+            "[&_img]:inline-block [&_img]:max-w-[180px] [&_img]:max-h-[140px] [&_img]:rounded-lg [&_img]:object-cover [&_img]:border [&_img]:border-border/30 [&_img]:shadow-sm [&_img]:mr-2 [&_img]:mb-2 [&_img]:align-top":
+              message.role === "assistant",
           })}
           data-testid="message-content"
           key={key}
@@ -129,92 +136,12 @@ const PurePreviewMessage = ({
     }
 
     if (type === "tool-getWeather") {
-      const { toolCallId, state } = part;
-      const approvalId = (part as { approval?: { id: string } }).approval?.id;
-      const isDenied =
-        state === "output-denied" ||
-        (state === "approval-responded" &&
-          (part as { approval?: { approved?: boolean } }).approval?.approved ===
-            false);
-      const widthClass = "w-[min(100%,450px)]";
-
-      if (state === "output-available") {
-        return (
-          <div className={widthClass} key={toolCallId}>
-            <Weather weatherAtLocation={part.output} />
-          </div>
-        );
-      }
-
-      if (isDenied) {
-        return (
-          <div className={widthClass} key={toolCallId}>
-            <Tool className="w-full" defaultOpen={true}>
-              <ToolHeader state="output-denied" type="tool-getWeather" />
-              <ToolContent>
-                <div className="px-4 py-3 text-muted-foreground text-sm">
-                  Weather lookup was denied.
-                </div>
-              </ToolContent>
-            </Tool>
-          </div>
-        );
-      }
-
-      if (state === "approval-responded") {
-        return (
-          <div className={widthClass} key={toolCallId}>
-            <Tool className="w-full" defaultOpen={true}>
-              <ToolHeader state={state} type="tool-getWeather" />
-              <ToolContent>
-                <ToolInput input={part.input} />
-              </ToolContent>
-            </Tool>
-          </div>
-        );
-      }
-
       return (
-        <div className={widthClass} key={toolCallId}>
-          <Tool className="w-full" defaultOpen={true}>
-            <ToolHeader state={state} type="tool-getWeather" />
-            <ToolContent>
-              {(state === "input-available" ||
-                state === "approval-requested") && (
-                <ToolInput input={part.input} />
-              )}
-              {state === "approval-requested" && approvalId && (
-                <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-                  <button
-                    className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
-                    onClick={() => {
-                      addToolApprovalResponse({
-                        id: approvalId,
-                        approved: false,
-                        reason: "User denied weather lookup",
-                      });
-                    }}
-                    type="button"
-                  >
-                    Deny
-                  </button>
-                  <button
-                    className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-                    onClick={() => {
-                      addToolApprovalResponse({
-                        id: approvalId,
-                        approved: true,
-                      });
-                    }}
-                    type="button"
-                  >
-                    Allow
-                  </button>
-                </div>
-              )}
-            </ToolContent>
-          </Tool>
-        </div>
+        <WeatherTool
+          addToolApprovalResponse={addToolApprovalResponse}
+          key={key}
+          part={part}
+        />
       );
     }
 
@@ -277,7 +204,18 @@ const PurePreviewMessage = ({
         >
           <ToolHeader state={state} type="tool-requestSuggestions" />
           <ToolContent>
-            {state === "input-available" && <ToolInput input={part.input} />}
+            {state === "input-available" && part.input && (
+              <div className="space-y-2 overflow-hidden">
+                <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                  Parameters
+                </h4>
+                <div className="rounded-md bg-muted/50">
+                  <pre className="p-3 text-xs">
+                    {JSON.stringify(part.input, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
             {state === "output-available" && (
               <ToolOutput
                 errorText={undefined}
@@ -301,8 +239,176 @@ const PurePreviewMessage = ({
       );
     }
 
+    if (type === "tool-webSearch") {
+      return <WebSearchTool key={key} part={part} />;
+    }
+
+    if (type === "tool-newsSearch") {
+      return <NewsSearchTool key={key} part={part} />;
+    }
+
     return null;
   });
+
+  const searchToolPart = message.parts?.find(
+    (part) =>
+      part.type === "tool-webSearch" && part.state === "output-available"
+  );
+  const searchOutput = searchToolPart?.output as
+    | Record<string, unknown>
+    | undefined;
+  const sources =
+    (searchOutput?.results as Array<{
+      title?: string;
+      snippet?: string;
+      url?: string;
+    }>) || [];
+
+  const sourcesBubble = isMounted &&
+    setArtifact &&
+    !isLoading &&
+    sources.length > 0 && (
+      <div className="mt-2 flex animate-[fade-up_0.2s_ease-out] flex-col gap-1.5">
+        <button
+          className="flex w-fit items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 hover:text-foreground"
+          onClick={(e) => {
+            if (setArtifact) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setArtifact({
+                boundingBox: {
+                  top: rect.top,
+                  left: rect.left,
+                  width: rect.width,
+                  height: rect.height,
+                },
+                content: JSON.stringify(sources),
+                documentId: `search-${message.id}`,
+                isVisible: true,
+                kind: "search",
+                status: "idle",
+                title: "Sources explorées",
+              });
+            }
+          }}
+          type="button"
+        >
+          <span className="mr-1 font-semibold text-primary/80">
+            Sources consultées :
+          </span>
+          <div className="flex items-center -space-x-1 overflow-hidden">
+            {sources.slice(0, 4).map((source) => {
+              let hostname = "";
+              try {
+                hostname = source.url ? new URL(source.url).hostname : "";
+              } catch {
+                // ignore
+              }
+
+              return (
+                <div
+                  className="size-4 overflow-hidden rounded-full border border-background bg-muted"
+                  key={source.url || hostname || Math.random().toString(36)}
+                >
+                  <Image
+                    alt=""
+                    className="size-full object-contain p-0.5"
+                    height={16}
+                    src={`https://www.google.com/s2/favicons?sz=32&domain=${hostname || "web"}`}
+                    unoptimized
+                    width={16}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          {sources.length > 4 && (
+            <span className="rounded bg-muted px-1 text-[10px] font-bold text-muted-foreground">
+              +{sources.length - 4}
+            </span>
+          )}
+        </button>
+      </div>
+    );
+
+  const newsToolPart = message.parts?.find(
+    (part) =>
+      part.type === "tool-newsSearch" && part.state === "output-available"
+  );
+  const newsOutput = newsToolPart?.output as
+    | Record<string, unknown>
+    | undefined;
+  const newsSources =
+    (newsOutput?.results as Array<{
+      title?: string;
+      snippet?: string;
+      url?: string;
+    }>) || [];
+
+  const newsSourcesBubble = isMounted &&
+    setArtifact &&
+    !isLoading &&
+    newsSources.length > 0 && (
+      <div className="mt-2 flex animate-[fade-up_0.2s_ease-out] flex-col gap-1.5">
+        <button
+          className="flex w-fit items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-all duration-150 hover:bg-muted/50 hover:text-foreground"
+          onClick={(e) => {
+            if (setArtifact) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setArtifact({
+                boundingBox: {
+                  top: rect.top,
+                  left: rect.left,
+                  width: rect.width,
+                  height: rect.height,
+                },
+                content: JSON.stringify(newsSources),
+                documentId: `news-${message.id}`,
+                isVisible: true,
+                kind: "search",
+                status: "idle",
+                title: "Sources d'actualités",
+              });
+            }
+          }}
+          type="button"
+        >
+          <span className="mr-1 font-semibold text-primary/80">
+            Sources d'actualités :
+          </span>
+          <div className="flex items-center -space-x-1 overflow-hidden">
+            {newsSources.slice(0, 4).map((source) => {
+              let hostname = "";
+              try {
+                hostname = source.url ? new URL(source.url).hostname : "";
+              } catch {
+                // ignore
+              }
+
+              return (
+                <div
+                  className="size-4 overflow-hidden rounded-full border border-background bg-muted"
+                  key={source.url || hostname || Math.random().toString(36)}
+                >
+                  <Image
+                    alt=""
+                    className="size-full object-contain p-0.5"
+                    height={16}
+                    src={`https://www.google.com/s2/favicons?sz=32&domain=${hostname || "web"}`}
+                    unoptimized
+                    width={16}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          {newsSources.length > 4 && (
+            <span className="rounded bg-muted px-1 text-[10px] font-bold text-muted-foreground">
+              +{newsSources.length - 4}
+            </span>
+          )}
+        </button>
+      </div>
+    );
 
   const actions = !isReadonly && (
     <MessageActions
@@ -325,6 +431,8 @@ const PurePreviewMessage = ({
     <>
       {attachments}
       {parts}
+      {sourcesBubble}
+      {newsSourcesBubble}
       {actions}
     </>
   );
@@ -343,13 +451,6 @@ const PurePreviewMessage = ({
           isUser ? "flex flex-col items-end gap-2" : "flex items-start gap-3"
         )}
       >
-        {isAssistant && (
-          <div className="flex h-[calc(13px*1.65)] shrink-0 items-center">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground ring-1 ring-border/50">
-              <SparklesIcon size={13} />
-            </div>
-          </div>
-        )}
         {isAssistant ? (
           <div className="flex min-w-0 flex-1 flex-col gap-2">{content}</div>
         ) : (
@@ -370,12 +471,6 @@ export const ThinkingMessage = () => {
       data-testid="message-assistant-loading"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-[calc(13px*1.65)] shrink-0 items-center">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground ring-1 ring-border/50">
-            <SparklesIcon size={13} />
-          </div>
-        </div>
-
         <div className="flex h-[calc(13px*1.65)] items-center text-[13px] leading-[1.65]">
           <Shimmer className="font-medium" duration={1}>
             Thinking...

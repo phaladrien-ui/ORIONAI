@@ -16,9 +16,7 @@ export default function AuthLayout({
           <ArrowLeftIcon className="size-3.5" />
           Back
         </Link>
-        <div className="flex flex-col gap-4">
-          {children}
-        </div>
+        <div className="flex flex-col gap-4">{children}</div>
       </div>
     </div>
   );

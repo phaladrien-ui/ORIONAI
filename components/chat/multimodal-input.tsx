@@ -3,11 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import equal from "fast-deep-equal";
-import {
-  ArrowUpIcon,
-  BotIcon,
-  ChevronDownIcon,
-} from "lucide-react";
+import { ArrowUpIcon, BotIcon, ChevronDownIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -22,6 +18,11 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -32,13 +33,8 @@ import {
   PromptInputTools,
 } from "../ai-elements/prompt-input";
 import { Button } from "../ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { StopIcon } from "./icons";
-import { getModeLabel, PlusMenu, type ModeType } from "./plus-menu";
+import { getModeLabel, type ModeType, PlusMenu } from "./plus-menu";
 import { PreviewAttachment } from "./preview-attachment";
 import {
   type SlashCommand,
@@ -502,8 +498,8 @@ function PureMultimodalInput({
             />
             <Button
               className="h-7 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground gap-1.5"
-              variant="ghost"
               onClick={() => setMode(null)}
+              variant="ghost"
             >
               <BotIcon className="size-3.5" />
               {getModeLabel(mode)}
@@ -517,7 +513,8 @@ function PureMultimodalInput({
                   className="h-7 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground gap-1"
                   variant="ghost"
                 >
-                  {orionModels.find((m) => m.id === orionModel)?.label ?? "Orion 2.2"}
+                  {orionModels.find((m) => m.id === orionModel)?.label ??
+                    "Orion 2.2"}
                   <ChevronDownIcon className="size-3" />
                 </Button>
               </PopoverTrigger>

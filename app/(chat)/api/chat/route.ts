@@ -1,3 +1,4 @@
+// app/(chat)/api/chat/route.ts
 import { geolocation, ipAddress } from "@vercel/functions";
 import {
   convertToModelMessages,
@@ -23,8 +24,10 @@ import { getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { editDocument } from "@/lib/ai/tools/edit-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
+import { newsSearch } from "@/lib/ai/tools/news-search";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { webSearch } from "@/lib/ai/tools/web-search";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -201,6 +204,8 @@ export async function POST(request: Request) {
               ? []
               : [
                   "getWeather",
+                  "webSearch",
+                  "newsSearch",
                   "createDocument",
                   "editDocument",
                   "updateDocument",
@@ -216,6 +221,8 @@ export async function POST(request: Request) {
           },
           tools: {
             getWeather,
+            webSearch,
+            newsSearch,
             createDocument: createDocument({
               session,
               dataStream,
