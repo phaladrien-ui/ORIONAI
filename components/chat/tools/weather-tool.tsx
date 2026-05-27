@@ -4,8 +4,8 @@ import {
   ToolHeader,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { Weather } from "@/components/app/weather";
-import type { WeatherAtLocation } from "@/components/app/weather";
+import { Weather } from "../weather";
+import type { WeatherAtLocation } from "../weather";
 
 type WeatherPart = {
   toolCallId: string;
