@@ -40,6 +40,16 @@ type DocumentPreviewProps = {
   args?: Partial<DocumentToolOutput> & { isUpdate?: boolean };
 };
 
+// Type étendu pour inclure "search" kind temporairement
+type ExtendedDocument = {
+  id: string;
+  createdAt: Date;
+  title: string;
+  userId: string;
+  content: string | null;
+  kind: string; // Plus flexible que ArtifactKind
+};
+
 export function DocumentPreview({
   isReadonly: _isReadonly,
   result,
@@ -99,8 +109,16 @@ export function DocumentPreview({
     );
   }
 
-  const document: Document | null = previewDocument
-    ? previewDocument
+  // CORRECTION ICI : Utiliser le type étendu pour être plus flexible
+  const document: ExtendedDocument | null = previewDocument
+    ? {
+        id: previewDocument.id,
+        createdAt: previewDocument.createdAt,
+        title: previewDocument.title,
+        userId: previewDocument.userId,
+        content: previewDocument.content,
+        kind: previewDocument.kind,
+      }
     : artifact.status === "streaming"
       ? {
           title: artifact.title,
@@ -125,10 +143,10 @@ export function DocumentPreview({
       />
       <DocumentHeader
         isStreaming={artifact.status === "streaming"}
-        kind={document.kind}
+        kind={document.kind as ArtifactKind}
         title={document.title}
       />
-      <DocumentContent document={document} />
+      <DocumentContent document={document as Document} />
     </div>
   );
 }
