@@ -80,7 +80,8 @@ const CloudIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-type WeatherAtLocation = {
+// CORRECTION: export ajouté devant le type
+export type WeatherAtLocation = {
   latitude: number;
   longitude: number;
   generationtime_ms: number;
