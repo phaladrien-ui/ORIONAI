@@ -54,7 +54,8 @@ export function SidebarUserNav({ user }: { user: NextAuthUser }) {
   const isGuest = guestRegex.test(data?.user?.email ?? "");
   const displayName = getDisplayName(user);
 
-  if (status === "loading") {
+  // CORRECTION ICI : Vérifier si la session est undefined ou si status n'est pas "authenticated"
+  if (status !== "authenticated") {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -158,7 +159,7 @@ export function SidebarUserNav({ user }: { user: NextAuthUser }) {
             <DropdownMenuItem
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] cursor-pointer hover:bg-red-500/10 transition-colors text-red-500"
               onClick={() => {
-                if (status === "loading") {
+                if (status !== "authenticated") {
                   toast({
                     type: "error",
                     description:
