@@ -277,8 +277,9 @@ function PureArtifact({
     throw new Error("Artifact definition not found!");
   }
 
+  // CORRECTION ICI - Vérification de l'existence de la méthode initialize
   useEffect(() => {
-    if (artifact.documentId !== "init" && artifactDefinition.initialize) {
+    if (artifact.documentId !== "init" && 'initialize' in artifactDefinition && artifactDefinition.initialize) {
       artifactDefinition.initialize({
         documentId: artifact.documentId,
         setMetadata,
