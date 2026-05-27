@@ -330,6 +330,7 @@ export async function getVotesByChatId({ id }: { id: string }) {
   }
 }
 
+// CORRECTION ICI - Fonction saveDocument avec cast du kind
 export async function saveDocument({
   id,
   title,
@@ -349,7 +350,7 @@ export async function saveDocument({
       .values({
         id,
         title,
-        kind,
+        kind: kind as "image" | "text" | "code" | "sheet",
         content,
         userId,
         createdAt: new Date(),
